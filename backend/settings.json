@@ -1,0 +1,13 @@
+{
+  "search": {
+    "provider": "duckduckgo"
+  },
+  "external_services": {
+    "jina": {
+      "api_key": ""
+    },
+    "langfuse": {
+      "host": "https://cloud.langfuse.com"
+    }
+  }
+}
