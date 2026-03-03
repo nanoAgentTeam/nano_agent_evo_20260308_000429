@@ -106,17 +106,28 @@ def main():
         history_path = os.path.join(project_root, "evolution_history.jsonl")
 
         # Load history from JSONL file
+        # Robust parser: handles concatenated JSON objects on the same line
+        # (e.g. when the agent forgets to add \n between entries)
         history_entries = []
         if os.path.exists(history_path):
             with open(history_path, "r", encoding="utf-8") as f:
-                for line_num, line in enumerate(f, 1):
-                    line = line.strip()
-                    if not line:
-                        continue
-                    try:
-                        history_entries.append(json.loads(line))
-                    except json.JSONDecodeError as e:
-                        print(f"[Evolution] Warning: Skipping corrupted line {line_num} in evolution_history.jsonl: {e}")
+                content = f.read()
+            decoder = json.JSONDecoder()
+            pos = 0
+            while pos < len(content):
+                while pos < len(content) and content[pos] in " \t\n\r":
+                    pos += 1
+                if pos >= len(content):
+                    break
+                try:
+                    obj, end = decoder.raw_decode(content, pos)
+                    history_entries.append(obj)
+                    pos = end
+                except json.JSONDecodeError as e:
+                    print(f"[Evolution] Warning: Skipping unparseable content at pos {pos}: {e}")
+                    # Skip to next newline to avoid infinite loop
+                    next_nl = content.find("\n", pos)
+                    pos = next_nl + 1 if next_nl != -1 else len(content)
 
         # Derive round number from history
         if history_entries:
