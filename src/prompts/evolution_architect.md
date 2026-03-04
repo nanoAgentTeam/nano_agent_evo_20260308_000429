@@ -189,28 +189,15 @@ cd {{blackboard}}/resources/workspace && PYTHONPATH={{blackboard}}/resources/wor
 
 ## Workflow
 
-### Pre-Phase 0: Read State & Create Workspace
+### Pre-Phase 0: Read State & Verify Workspace
 1. `read_file` → `{{root_path}}/evolution_state.json` — record `current_round` (N), `current_branch`, `base_branch`, and `history`.
 1b. `read_file` → `{{root_path}}/evolution_goals.md` — this is the product vision. Keep it in mind when choosing evolution direction in Phase 1.
-2. **Create workspace as a git worktree NOW** — before ANY agent is spawned:
-   ```bash
-   git -C {{root_path}} worktree add -b {BRANCH} {{blackboard}}/resources/workspace {BASE_BRANCH}
-   ```
-   - `{BRANCH}` = `current_branch` from state.json
-   - `{BASE_BRANCH}` = `base_branch` from state.json
-   - Do NOT use `HEAD` or invent names.
-3. **VERIFY the worktree was created successfully.** Check the bash exit code.
-   - If it **failed** (e.g. exit code 128 because the directory already exists), clean up and retry:
-     ```bash
-     rm -rf {{blackboard}}/resources/workspace && git -C {{root_path}} worktree add -b {BRANCH} {{blackboard}}/resources/workspace {BASE_BRANCH}
-     ```
-   - If the branch already exists (e.g. from a previous failed round), use `worktree add` without `-b`:
-     ```bash
-     rm -rf {{blackboard}}/resources/workspace && git -C {{root_path}} worktree add {{blackboard}}/resources/workspace {BRANCH}
-     ```
-   - If it STILL fails after retry, invoke Recovery Protocol (Phase 3.5) immediately.
+2. **Verify the workspace worktree exists.** The launcher (`main.py`) automatically creates the git worktree at `{{blackboard}}/resources/workspace/` before you start. You do NOT need to create it yourself.
+   - Check that `{{blackboard}}/resources/workspace/.git` is a FILE (not a directory) — this confirms it's a valid worktree.
+   - If the workspace does NOT exist or `.git` is missing, invoke Recovery Protocol (Phase 3.5) immediately — something went wrong with the launcher.
+   - Do NOT run `git worktree add` yourself. The launcher handles branch creation (`current_branch`) and base branch selection (`base_branch`) automatically.
 
-4. Initialize required coordination indices **before any spawn**:
+3. Initialize required coordination indices **before any spawn**:
    - Ensure `central_plan.md` exists (required by ArchitectGuard before any `spawn_swarm_agent` call):
      1) `blackboard(operation="list_templates")`
      2) `blackboard(operation="read_template", filename="central_plan.md")`

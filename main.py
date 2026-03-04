@@ -171,6 +171,56 @@ def main():
         # Ensure evolution_reports directory exists
         os.makedirs(os.path.join(project_root, "evolution_reports"), exist_ok=True)
 
+        # ── Auto-create git worktree for this round ──────────────────────────
+        blackboard_dir = os.path.join(project_root, ".blackboard")
+        workspace = os.path.join(blackboard_dir, "resources", "workspace")
+        _branch = evo_state["current_branch"]
+        _base = evo_state["base_branch"]
+
+        # Ensure parent directory exists
+        os.makedirs(os.path.dirname(workspace), exist_ok=True)
+
+        # Clean up any leftover workspace directory (orphaned from previous run)
+        if os.path.exists(workspace):
+            print(f"[Evolution] Cleaning up leftover workspace at {workspace}")
+            # If it's a valid worktree, remove it properly first
+            if os.path.isfile(os.path.join(workspace, ".git")):
+                _sp.run(["git", "-C", project_root, "worktree", "remove", workspace, "--force"],
+                        capture_output=True, text=True)
+            else:
+                shutil.rmtree(workspace, ignore_errors=True)
+            # Prune stale worktree references
+            _sp.run(["git", "-C", project_root, "worktree", "prune"],
+                    capture_output=True, text=True)
+
+        # Try creating worktree with new branch
+        wt_result = _sp.run(
+            ["git", "-C", project_root, "worktree", "add", "-b", _branch, workspace, _base],
+            capture_output=True, text=True
+        )
+
+        if wt_result.returncode != 0:
+            # Branch may already exist (e.g. from a previous failed round)
+            print(f"[Evolution] Worktree add -b failed: {wt_result.stderr.strip()}")
+            print(f"[Evolution] Retrying without -b (branch may already exist)...")
+            # Clean directory if it was partially created
+            if os.path.exists(workspace):
+                shutil.rmtree(workspace, ignore_errors=True)
+            wt_result = _sp.run(
+                ["git", "-C", project_root, "worktree", "add", workspace, _branch],
+                capture_output=True, text=True
+            )
+
+        if wt_result.returncode != 0:
+            print(f"[Evolution] ERROR: Failed to create worktree: {wt_result.stderr.strip()}")
+            print(f"[Evolution] The round will proceed but workspace may not be properly set up.")
+        else:
+            # Verify worktree was created successfully
+            if os.path.isfile(os.path.join(workspace, ".git")):
+                print(f"[Evolution] Worktree created at {workspace} (branch: {_branch})")
+            else:
+                print(f"[Evolution] WARNING: Worktree directory exists but .git marker not found!")
+
         mission = (
             f"Self-Evolution Round {round_num}.\n\n"
             f"Evolution History (last 5 rounds):\n"
