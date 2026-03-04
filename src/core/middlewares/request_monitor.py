@@ -28,9 +28,19 @@ class RequestMonitorMiddleware(StrategyMiddleware):
 
     def _check_and_handle_requests(self):
         """Check for pending requests and handle them interactively."""
+        import os
         try:
             pending_requests = self.request_manager.list_pending_requests()
             if not pending_requests:
+                return
+
+            # Evolution mode: auto-handle all pending requests immediately, no blocking
+            if os.environ.get("NANO_EVOLUTION_MODE") == "1":
+                auto_approve = os.environ.get("NANO_EVOLUTION_AUTO_APPROVE") == "1"
+                status = "APPROVED" if auto_approve else "DENIED"
+                for req in pending_requests:
+                    self.request_manager.update_request_status(req["id"], status)
+                    Logger.info(f"[RequestMonitor][Evolution] Auto-{status} request from {req['agent_name']}")
                 return
 
             if not self.confirmation_callback:

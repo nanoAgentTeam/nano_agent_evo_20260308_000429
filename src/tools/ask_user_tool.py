@@ -41,6 +41,14 @@ class AskUserTool(BaseTool):
 
     @schema_strict_validator
     def execute(self, question: str, **kwargs) -> str:
+        import os
+        # 0. Evolution mode: auto-reply immediately, no human available
+        if os.environ.get("NANO_EVOLUTION_MODE") == "1":
+            return (
+                "[Auto-reply] Running in autonomous evolution mode. "
+                "No human is available. Proceed with your best judgment and be conservative."
+            )
+
         # 1. Use callback if available (TAP stdio or TUI dialog)
         if self.input_callback:
             return self.input_callback(question)
