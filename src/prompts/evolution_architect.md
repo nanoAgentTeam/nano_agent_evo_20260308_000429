@@ -275,24 +275,20 @@ Each agent appends its own report block to `research_brief.md` (append-only), th
      - One verification task named `Test and verify` (type: standard, status: BLOCKED) that depends on all implementation tasks
    - Optional extra tasks are allowed for integration, migration, or cleanup when needed by the chosen direction.
 3. **Workspace already exists** at `{{blackboard}}/resources/workspace/` (created in Pre-Phase 0).
-4. `spawn_swarm_agent` → Developer agent:
-   - Role: see Developer Agent Role template below
-   - Goal: implement all implementation tasks from the proposal in `{{blackboard}}/resources/workspace/`
-   - Provide the full workspace path and list every file to change
-   - Instruct to use skills **on demand**: pick relevant skills first, and activate `test-driven-development` for non-trivial code changes
-5. `spawn_swarm_agent` → Tester agent simultaneously:
-   - Role: see Tester Agent Role template below
-   - Goal: validate all changes in workspace once all implementation tasks are DONE
-   - Instruct to use skills **on demand**: activate `verification-before-completion` when verification scope is behavior-affecting or non-trivial
-6. Monitor via `wait` + System Prompt registry status + reading central_plan until the `Test and verify` task is DONE.
+4. `spawn_swarm_agent` → **Dynamically Spawn Agents based on the Plan**:
+   - For EACH unique role assigned in your `central_plan.md` tasks (e.g., Developer, Tester, Reviewer, etc.), spawn one corresponding agent.
+   - Goal: Instruct each agent to complete their assigned tasks in `{{blackboard}}/resources/workspace/`.
+   - Provide the full workspace path and list every file to change.
+   - Instruct them to use skills **on demand**: pick relevant skills first, and activate appropriate skills (e.g., `test-driven-development` for non-trivial code changes, `verification-before-completion` for testing).
+   - If allocating a Tester, ensure they know their task is to validate all changes in the workspace once implementation is DONE.
+5. Monitor via `wait` + System Prompt registry status + reading central_plan until the `Test and verify` (or equivalent final) task is DONE.
 
    **Agent Recovery Protocol (during monitoring):**
    - Each `wait` cycle, check the REAL-TIME SWARM STATUS in your system prompt.
    - If a Worker agent shows `status: DEAD` / `verified_status: DEAD` BUT its task is NOT DONE:
      1. **Immediately** re-spawn a replacement agent with the SAME role and goal.
      2. Use `read_index` to get fresh checksum, then `update_task` to reset the stuck task's status back to PENDING (clear assignees).
-     3. You may retry **at most once** per agent role per round.
-     4. If the replacement also dies without completing → go to Phase 3.5 Recovery Protocol.
+     3. If the replacement also dies without completing → go to Phase 3.5 Recovery Protocol.
    - Do NOT wait passively hoping a dead agent will recover — it won't.
 
 ### Phase 3: Judge & Report
