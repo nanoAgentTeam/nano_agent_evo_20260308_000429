@@ -283,7 +283,8 @@ def main():
             blackboard_dir=blackboard_dir,
             model=args.model,
             max_iterations=200,  # Increased Budget for Watchdog
-            extra_strategies=[request_monitor, watchdog_guard]
+            extra_strategies=[request_monitor, watchdog_guard],
+            is_architect=True
         )
         
         # 6. Add Research Capabilities (Requested by User)
