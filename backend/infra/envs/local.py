@@ -238,10 +238,6 @@ class LocalEnvironment(Environment):
         """
         Perform security checks on the command to be executed.
         """
-        # Evolution mode: auto-approve or auto-deny without prompting
-        if self.evolution_mode:
-            return self.evolution_auto_approve  # True=放行, False=拒绝
-
         # Auto-approve whitelisted patterns (e.g., evolution mode auto-approves git)
         for pattern in self.auto_approve_patterns:
             if command.strip().startswith(pattern):
