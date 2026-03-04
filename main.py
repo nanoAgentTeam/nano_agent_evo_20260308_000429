@@ -66,7 +66,7 @@ def main():
     parser = argparse.ArgumentParser(description="Nano Agent Team - Watchdog Launcher")
     parser.add_argument("query", nargs="?", help="The mission or query for the swarm")
     parser.add_argument("--role", default="Architect", help="Role of the main agent (default: Architect)")
-    parser.add_argument("--name", default="Watchdog", help="Name of the main agent")
+    parser.add_argument("--name", default="Architect", help="Name of the main agent")
     # Changed: --clean is now default behavior, added --keep-history to inverse it
     parser.add_argument("--keep-history", action="store_true", help="Keep the previous blackboard state (do not clean)")
     parser.add_argument("--model", type=str, default=None, help="Model provider key (default: Use settings.json)")
@@ -271,7 +271,7 @@ def main():
     try:
         # 5. Initialize Watchdog Agent
         # Log Watchdog start for status tracking
-        watchdog_log = os.path.join(blackboard_dir, "logs", "Watchdog.log")
+        watchdog_log = os.path.join(blackboard_dir, "logs", f"{args.name}.log")
         os.makedirs(os.path.dirname(watchdog_log), exist_ok=True)
         with open(watchdog_log, "w", encoding="utf-8") as f:
             f.write(f"[{os.getpid()}] Watchdog Started\n")

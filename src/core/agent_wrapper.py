@@ -163,6 +163,7 @@ class SwarmAgent:
         # Resolve path variables in system prompt so LLM knows the actual paths
         sys_prompt_content = sys_prompt_content.replace("{{blackboard}}", os.path.abspath(self.blackboard_dir))
         sys_prompt_content = sys_prompt_content.replace("{{root_path}}", Config.ROOT_PATH)
+        sys_prompt_content = sys_prompt_content.replace("{{agent_name}}", self.name)
 
         system_config = SystemPromptConfig(base_prompt=sys_prompt_content)
 
