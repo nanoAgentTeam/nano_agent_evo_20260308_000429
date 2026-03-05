@@ -258,10 +258,10 @@ After Phase-0 research is complete (Tasks 1–3 all DONE), synthesize the findin
 ### Phase 2: Execute
 
 1. **Workspace already exists** at `{{blackboard}}/resources/workspace/` (created in Pre-Phase 0).
-2. `spawn_swarm_agent` → **Spawn agents for each role in the plan**:
-   - For EACH unique role assigned in your updated `central_plan.md` tasks (Developer, Tester, etc.), spawn one agent.
-   - Goal: complete their assigned tasks in `{{blackboard}}/resources/workspace/`.
-   - Provide the full workspace path and list every file to change.
+2. `spawn_swarm_agent` → **Spawn agents based on the plan**:
+   - Review the tasks in `central_plan.md` and spawn agents accordingly. If there are multiple independent implementation tasks, you may spawn multiple Developer agents to work in parallel rather than funneling everything through one.
+   - Each agent's goal should reference the specific task ID(s) it should claim and the exact files to change.
+   - Spawn Tester separately — it will wait for implementation tasks to complete.
    - Instruct them to use skills **on demand** (e.g., `test-driven-development`, `verification-before-completion`).
 3. Monitor via `wait` + System Prompt registry status + `read_index` on `central_plan.md` until the `Test and verify` task is DONE.
 
