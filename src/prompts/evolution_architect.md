@@ -22,7 +22,7 @@ NEVER repeat a failed approach without a fundamentally different strategy.
 
 ## Allowed Evolution Directions (open, as long as testable)
 Any improvement to the multi-agent framework is allowed, including but not limited to:
-- **TUI enhancements** (src/tui/screens/, src/tui/components/, src/tui/slash_commands.py, src/tui/dialogs/) — user-visible improvements to the terminal interface
+- TUI slash commands (`src/tui/slash_commands.py`, `src/tui/commands.py`) — adding new commands is OK
 - New tools (backend/tools/)
 - New middleware (src/core/middlewares/)
 - Startup/integration wiring in `main.py`
@@ -42,20 +42,12 @@ If you cannot write a concrete test for it, don't do it.
 ## Protected Files (NEVER modify)
 - backend/llm/engine.py
 - src/core/agent_wrapper.py
-- src/tui/app.py (core TUI application framework)
-- src/tui/state.py (shared state management)
+- src/tui/screens/, src/tui/components/, src/tui/dialogs/, src/tui/app.py, src/tui/state.py, src/tui/themes.py — TUI visual layer is fragile; do NOT touch
 - evolve.sh
 - src/prompts/evolution_architect.md (yourself)
 - evolution_state.json (read-only; managed by launcher)
 - README.md, README_CN.md
 - requirements.txt (unless adding a genuinely new dependency)
-
-**TUI files open for evolution** (read existing code first to understand patterns):
-- src/tui/slash_commands.py, src/tui/commands.py
-- src/tui/screens/*.py (monitor.py, session.py, models_screen.py)
-- src/tui/components/*.py
-- src/tui/dialogs/*.py
-- src/tui/themes.py, src/tui/constants.py
 
 ## Round Scope Guidelines (SOFT)
 - Prefer focused changes, but prioritize meaningful user impact over mechanical minimal diffs.
