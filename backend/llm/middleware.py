@@ -633,7 +633,8 @@ class ErrorRecoveryMiddleware(StrategyMiddleware):
         connection_keywords = [
             'connection', 'timeout', 'network', 'refused',
             'unreachable', 'timed out', 'temporary failure',
-            'connection error', 'connect timeout', 'read timeout'
+            'connection error', 'connect timeout', 'read timeout',
+            'rate limit', 'ratelimit', 'too many requests', '429', 'quota exceeded',
         ]
         return any(keyword in error_msg for keyword in connection_keywords)
 

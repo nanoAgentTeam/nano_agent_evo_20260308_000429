@@ -237,7 +237,8 @@ class SwarmAgent:
                     # Check if this is a recoverable connection error
                     is_connection_error = any(keyword in error_msg for keyword in [
                         'connection', 'timeout', 'network', 'refused',
-                        'unreachable', 'timed out', 'temporary failure'
+                        'unreachable', 'timed out', 'temporary failure',
+                        'rate limit', 'ratelimit', 'too many requests', '429', 'quota exceeded',
                     ])
 
                     if is_connection_error and engine_retry_count < max_engine_retries - 1:
