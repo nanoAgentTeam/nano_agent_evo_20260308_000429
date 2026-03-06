@@ -91,24 +91,14 @@ def main():
 
     # 3. Load Prompt & Determine Mission
     if args.evolution:
-        # Evolution mode: base architect protocol + evolution-specific overrides
-        base_prompt_path = os.path.join(project_root, "src/prompts/architect.md")
+        # Evolution mode: standalone prompt (no base architect concatenation)
         evo_prompt_path = os.path.join(project_root, "src/prompts/evolution_architect.md")
         if not os.path.exists(evo_prompt_path):
             print(f"Error: Evolution prompt not found at {evo_prompt_path}")
             return
 
-        base_content = ""
-        if os.path.exists(base_prompt_path):
-            with open(base_prompt_path, "r", encoding="utf-8") as f:
-                base_content = f.read()
-
         with open(evo_prompt_path, "r", encoding="utf-8") as f:
-            evo_content = f.read()
-
-        # Combine: base architect protocol first, then evolution-specific overrides
-        # evolution_architect.md sections take precedence where they overlap
-        architect_role_content = base_content + "\n\n---\n\n" + evo_content
+            architect_role_content = f.read()
 
         # Read evolution state from JSONL (source of truth)
         # evolution_history.jsonl — append-only log, one JSON object per line
