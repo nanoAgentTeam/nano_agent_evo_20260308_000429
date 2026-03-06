@@ -212,3 +212,5 @@ eval_runs/
 logs/
 keys.json
 .blackboard/
+evolution_reports/
+evolution_history.jsonl

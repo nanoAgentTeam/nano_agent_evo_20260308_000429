@@ -32,3 +32,27 @@ The TUI (`src/tui/`) is now open for evolution. Consider the full surface:
 - `backend/utils/` — shared infrastructure
 
 Explore all of these. Don't default to the easiest one.
+
+## Quality Red Lines (HARD CONSTRAINTS — violating any = automatic FAIL)
+
+1. **No Duplication**: Before proposing ANY new module, grep the codebase for similar
+   functionality. If an existing tool/middleware/utility already does 70%+ of the same
+   thing, DO NOT create a new one — extend the existing module instead.
+
+2. **No Dead Code**: Every new .py file MUST be reachable from a running code path.
+   This framework has TWO entry points (main.py and src/tui/agent_bridge.py) — wire
+   into BOTH, or explain why only one is needed.
+
+3. **Read Before Write**: Do NOT create new tools/middleware without first reading the
+   base class and at least one existing implementation in the same directory. Pattern
+   violations (wrong base class, missing __call__, wrong method signature) are automatic FAIL.
+
+4. **No Import Crashes**: Every new/modified .py file must be importable without
+   optional dependencies. Guard third-party imports with try/except if the package
+   may not be installed.
+
+5. **No Hardcoded Paths**: Use {{blackboard}}, {{root_path}}, or config-based paths.
+   Absolute paths to specific machines are forbidden.
+
+6. **Protected Files Are Sacred**: Never modify files listed in the Protected Files
+   section of the evolution protocol. No exceptions.
