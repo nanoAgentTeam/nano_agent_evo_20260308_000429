@@ -118,3 +118,8 @@ User mission
 **Changed**: backend/llm/tool_registry.py, backend/tools/arxiv_search.py, main.py, src/tui/agent_bridge.py, tests/test_tools_integration.py
 **What it does**: Integrated ActivateSkillTool and ArxivSearchTool into both main.py and agent_bridge.py entry points. Fixed ArxivSearchTool to inherit from BaseTool. Added integration tests.
 **Wired into**: (not documented — check Wire-in Checklist next round)
+
+### Round 2 — Session Cost Tracking & Export Tool - Added SessionCostExportTool for tracking, summarizing, and exporting per-session token usage and cost data with CSV/JSON export and /cost TUI slash command (auto-logged 2026-03-07T16:41:00Z)
+**Changed**: backend/llm/tool_registry.py, main.py, src/tui/agent_bridge.py, src/tui/slash_commands.py, backend/tools/session_cost_export.py, tests/test_session_cost_export.py
+**What it does**: Session Cost Tracking & Export Tool - Added SessionCostExportTool for tracking, summarizing, and exporting per-session token usage and cost data with CSV/JSON export and /cost TUI slash command
+**Wired into**: (not documented — check Wire-in Checklist next round)

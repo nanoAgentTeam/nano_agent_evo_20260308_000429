@@ -33,6 +33,7 @@ from backend.tools.web_search import SearchTool
 from backend.tools.web_reader import WebReaderTool
 from backend.tools.activate_skill import ActivateSkillTool
 from backend.tools.arxiv_search import ArxivSearchTool
+from backend.tools.session_cost_export import SessionCostExportTool
 
 from src.core.agent_wrapper import SwarmAgent
 from .components.message import ChatMessage
@@ -216,6 +217,7 @@ class AgentBridge:
                 WebReaderTool(),
                 ActivateSkillTool(),
                 ArxivSearchTool(),
+                SessionCostExportTool(),
                 BashTool(env=env),
                 WriteFileTool(env=env),
                 ReadFileTool(env=env),
@@ -281,6 +283,7 @@ class AgentBridge:
         self._swarm_agent.add_tool(WebReaderTool())
         self._swarm_agent.add_tool(ActivateSkillTool())
         self._swarm_agent.add_tool(ArxivSearchTool())
+        self._swarm_agent.add_tool(SessionCostExportTool())
         
         # Add basic file tools to architect as well
         from backend.tools.bash import BashTool

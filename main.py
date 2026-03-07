@@ -115,6 +115,7 @@ from backend.tools.edit_file import EditFileTool
 from backend.tools.grep import GrepTool
 from backend.tools.glob import GlobTool
 from backend.tools.evolution_workspace import EvolutionWorkspaceTool
+from backend.tools.session_cost_export import SessionCostExportTool
 
 # Ensure project root is in path
 project_root = os.path.dirname(os.path.abspath(__file__))
@@ -404,6 +405,7 @@ def main():
         watchdog.add_tool(EditFileTool(env=env))
         watchdog.add_tool(GrepTool())
         watchdog.add_tool(GlobTool())
+        watchdog.add_tool(SessionCostExportTool())
 
         # Evolution mode: add workspace commit/cleanup tool
         # finish_tool will BLOCK if this hasn't been called first

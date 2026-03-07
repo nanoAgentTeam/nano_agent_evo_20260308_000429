@@ -34,6 +34,7 @@ from backend.tools.activate_skill import ActivateSkillTool
 from backend.tools.arxiv_search import ArxivSearchTool
 from backend.tools.grep import GrepTool
 from backend.tools.glob import GlobTool
+from backend.tools.session_cost_export import SessionCostExportTool
 from backend.utils.logger import Logger
 
 
@@ -206,6 +207,7 @@ def bootstrap_llm(agents_dir: str, skills_dir: str, engine_factory: Callable) ->
     registry.register_tool_class("bash", BashTool)
     registry.register_tool_class("activate_skill", ActivateSkillTool)
     registry.register_tool_class("arxiv_search", ArxivSearchTool)
+    registry.register_tool_class("session_cost_export", SessionCostExportTool)
     # registry.register_tool_class("read_skill_resource", SkillResourceTool)
     # registry.register_tool_class("query_goal", QueryGoalTool)
     # registry.register_tool_class("query_intent", QueryIntentTool)

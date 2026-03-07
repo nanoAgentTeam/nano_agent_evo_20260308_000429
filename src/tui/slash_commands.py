@@ -61,11 +61,32 @@ def handle_slash_command(app: App, command: str, source: str = "session", contex
         app.exit()
         return True
         
+    elif cmd == "/cost":
+        # Display session cost information
+        cost_info = """
+💰 Session Cost Tracking
+─────────────────────────
+Use the session_cost_export tool to track and export costs.
+Example: Call tool with session_data to record costs, or export to CSV/JSON.
+Models tracked: GPT-4, GPT-3.5-turbo, Claude-3, Gemini-Pro
+        """
+        if source == "session" and context:
+            try:
+                chat_area = context.query_one("#chat-area", ScrollableContainer)
+                chat_area.mount(Static(cost_info, classes="system-message"))
+                chat_area.scroll_end(animate=False)
+            except Exception:
+                app.notify("Use session_cost_export tool for cost tracking", severity="information")
+        else:
+            app.notify("Use session_cost_export tool for cost tracking", severity="information")
+        return True
+
     elif cmd == "/help":
         help_text = """
 Available commands:
 /iterations <n> - Set max swarm iterations (10-1000)
 /status - Show current configuration
+/cost - Show session cost tracking info
 /exit - Exit the application
 /help - Show this help message
         """
