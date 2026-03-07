@@ -2,8 +2,9 @@ import requests
 import xml.etree.ElementTree as ET
 from typing import Dict, Any, List
 from backend.llm.decorators import schema_strict_validator
+from backend.tools.base import BaseTool
 
-class ArxivSearchTool:
+class ArxivSearchTool(BaseTool):
     """
     Search Arxiv for research papers.
     Uses the official arXiv API (http://export.arxiv.org/api/query).

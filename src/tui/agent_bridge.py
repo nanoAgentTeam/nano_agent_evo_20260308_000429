@@ -31,6 +31,8 @@ from src.core.middlewares import (
 from backend.tools.base import BaseTool
 from backend.tools.web_search import SearchTool
 from backend.tools.web_reader import WebReaderTool
+from backend.tools.activate_skill import ActivateSkillTool
+from backend.tools.arxiv_search import ArxivSearchTool
 
 from src.core.agent_wrapper import SwarmAgent
 from .components.message import ChatMessage
@@ -212,6 +214,8 @@ class AgentBridge:
             self._tools = [
                 SearchTool(),
                 WebReaderTool(),
+                ActivateSkillTool(),
+                ArxivSearchTool(),
                 BashTool(env=env),
                 WriteFileTool(env=env),
                 ReadFileTool(env=env),
@@ -275,6 +279,8 @@ class AgentBridge:
         # Add research tools (same as main.py)
         self._swarm_agent.add_tool(SearchTool())
         self._swarm_agent.add_tool(WebReaderTool())
+        self._swarm_agent.add_tool(ActivateSkillTool())
+        self._swarm_agent.add_tool(ArxivSearchTool())
         
         # Add basic file tools to architect as well
         from backend.tools.bash import BashTool

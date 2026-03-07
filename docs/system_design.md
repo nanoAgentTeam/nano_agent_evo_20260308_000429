@@ -113,3 +113,8 @@ User mission
 **Wired into**: main.py (Watchdog middleware chain) and documented in system_design.md
 
 <!-- rounds appended below by evolution process -->
+
+### Round 1 — Integrated ActivateSkillTool and ArxivSearchTool into both main.py and agent_bridge.py entry points. Fixed ArxivSearchTool to inherit from BaseTool. Added integration tests. (auto-logged 2026-03-07T16:24:08Z)
+**Changed**: backend/llm/tool_registry.py, backend/tools/arxiv_search.py, main.py, src/tui/agent_bridge.py, tests/test_tools_integration.py
+**What it does**: Integrated ActivateSkillTool and ArxivSearchTool into both main.py and agent_bridge.py entry points. Fixed ArxivSearchTool to inherit from BaseTool. Added integration tests.
+**Wired into**: (not documented — check Wire-in Checklist next round)

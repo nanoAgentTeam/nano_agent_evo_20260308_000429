@@ -104,6 +104,8 @@ from src.core.agent_wrapper import SwarmAgent
 from backend.infra.config import Config
 from backend.tools.web_search import SearchTool
 from backend.tools.web_reader import WebReaderTool
+from backend.tools.activate_skill import ActivateSkillTool
+from backend.tools.arxiv_search import ArxivSearchTool
 from src.core.middlewares import RequestMonitorMiddleware, ArchitectGuardMiddleware
 from backend.infra.envs.local import LocalEnvironment
 from backend.tools.bash import BashTool
@@ -386,6 +388,8 @@ def main():
         # 6. Add Research Capabilities (Requested by User)
         watchdog.add_tool(SearchTool())
         watchdog.add_tool(WebReaderTool())
+        watchdog.add_tool(ActivateSkillTool())
+        watchdog.add_tool(ArxivSearchTool())
 
         env = LocalEnvironment(
             workspace_root=project_root,
