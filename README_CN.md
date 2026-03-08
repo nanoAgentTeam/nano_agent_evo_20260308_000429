@@ -1,111 +1,109 @@
-而 watchdog 的核心应该是，
-1. watchdog 只是做任务规划和监控，不直接干预执行
-2. agent 只规定 role（能做什么），任务面板公布现在的任务，由 agent 认领，watchdog 的核心是拆解出任务和可以完成任务的角色
+# nano_agent_evo_20260308_000429
 
+[nano_agent_team_selfevolve](https://github.com/nanoAgentTeam/nano_agent_team_selfevolve) 的演化会话仓库。
 
-c7007c7a9dc22c74f166cffd60eb922f302fa02c3676629bd271bf07f06c3594
+## 项目背景
 
+`nano_agent_team_selfevolve` 是一个基于**黑板架构**的多 Agent 协作框架——Agent 通过共享文件协作，"监督者"（watchdog）负责规划任务，工作 Agent 按角色认领。框架内置了**自进化引擎**：一个自动化循环，由"进化架构师"Agent 调度子 Agent（研究员、审计员、开发者、测试员、审查员）来改进框架自身。
 
+本仓库就是一次这样的演化会话——由 `evolve_session.sh` 创建的隔离克隆，运行了 3 轮自主演化。
 
-以下是这段技术文档的**精准、专业且符合中文技术文档表达习惯**的完整翻译，保留了关键技术术语的统一性和操作指令的可读性：
+## 演化配置
 
----
+| 参数 | 值 |
+|------|------|
+| 脚本 | `evolve_session.sh` |
+| 轮数 | 3 |
+| 模型 | `qwen/qwen3.5-plus`（阿里通义千问 3.5 Plus）|
+| 基准分支 | `original`（会话启动时上游 `main` 的快照）|
+| 隔离方式 | 全新 GitHub 仓库克隆，独立 venv |
+| 总耗时 | 62 分 19 秒 |
+| 成绩 | **2 PASS / 1 FAIL**（通过率 66%）|
 
-# nano_agent_team_selfevolve
+### `evolve_session.sh` 工作流程
 
-English (this page) | [中文文档](README_CN.md)
+1. 在组织下创建新 GitHub 仓库
+2. 将当前 `main` 分支推送为种子代码
+3. 本地克隆，创建 `original` 分支作为基准
+4. 安装全新 Python venv
+5. 运行 N 轮 `python main.py --evolution`
+6. 每轮结束后：检查判定结果，推送所有分支到 GitHub
+7. 最终：将最后一个 PASS 分支提升为 `main`（force-push）
 
-`nano_agent_team_selfevolve` 是基于 `nano_agent_team` 开发的轻量级二次开发分支，核心目标是新增无人值守的自进化工作流。
+## 演化做了什么
 
-如需查看完整框架文档（架构、TUI/CLI 细节、工具系统），请参考该代码库中的上游 README 文件。
+### 第 1 轮 — 通过：集成 ActivateSkillTool 和 ArxivSearchTool（20 分 49 秒）
 
-## 本代码库新增内容
+**分支：** `evolution/r1-20260308_000525` | **类型：** 集成（INTEGRATION）
 
-相较于上游 `nano_agent_team`，本代码库主要新增并对接了自进化循环逻辑：
+审计员扫描代码库后发现两个工具作为源文件存在但未接入运行系统：
 
-- `main.py --evolution`：启动进化架构师流程。
-- `evolve.sh`：轮次化循环运行脚本（使用方式：`bash evolve.sh [max_rounds] [model]`）。
-- `src/prompts/evolution_architect.md`：自主进化轮次的提示词协议文件。
-- `backend/tools/evolution_workspace.py`：进化工作区/分支生命周期管理工具。
-- `evolution_state.json` + `evolution_history.jsonl`（自动生成）：状态追踪文件与仅追加式历史日志文件。
-- `evolution_reports/`：各轮次的 markdown 格式报告目录。
+- **`ActivateSkillTool`** — 已存在于 `backend/tools/activate_skill.py`，甚至已在 `tool_registry.py` 中注册，但 `main.py` 和 `agent_bridge.py` 的 `add_tool()` 调用中从未添加。演化加了两行接线代码。**边际价值** — 代码本来就在那里。
+- **`ArxivSearchTool`** — 存在于 `backend/tools/arxiv_search.py`，但有一个真实 bug：`class ArxivSearchTool:` 没有继承 `BaseTool`，导致与工具系统不兼容。演化修复了继承关系、完成注册和接线。**真正的修复**。
+- 新增 15 个集成测试 `tests/test_tools_integration.py`。
 
-## 快速开始
+**变更文件：** `backend/llm/tool_registry.py`、`backend/tools/arxiv_search.py`、`main.py`、`src/tui/agent_bridge.py`、`tests/test_tools_integration.py`、`docs/system_design.md`
 
-### 1. 安装
+### 第 2 轮 — 通过：会话成本追踪与导出工具（16 分 33 秒）
 
-```bash
-cd /Users/zc/PycharmProjects/nano_agent_team_selfevolve
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+**分支：** `evolution/r2-20260308_002612` | **类型：** 新功能（FEATURE）
+
+从零创建了 `backend/tools/session_cost_export.py`（281 行）——可追踪、汇总和导出每会话的 token 用量和费用数据。同时在 TUI 中添加了 `/cost` 斜杠命令。
+
+**诚实评估：** 该工具是一个**有数据结构但没有数据来源的空壳**。它定义了主流模型（GPT-4、Claude、Gemini、Qwen）的费用计算逻辑和导出格式（JSON/CSV），但框架中没有中间件在实际收集 LLM 响应中的 token 用量。调用 `/cost` 永远返回 "No cost data recorded"。需要编写 `CostTrackerMiddleware` 才能让该工具产生实际输出。
+
+**变更文件：** `backend/tools/session_cost_export.py`（新）、`backend/llm/tool_registry.py`、`main.py`、`src/tui/agent_bridge.py`、`src/tui/slash_commands.py`、`tests/test_session_cost_export.py`（新）、`docs/system_design.md`
+
+### 第 3 轮 — 失败：Agent 级成本仪表盘组件（24 分 32 秒）
+
+**分支：** `evolution/r3-20260308_004252` | **类型：** 新功能（被拒）
+
+试图修改 `src/tui/screens/monitor.py` 以添加成本仪表盘组件。质量门控拒绝了该变更，因为该文件在 `evolution_gate.py` 的 `PROTECTED_DIRS` 列表中。**安全系统按设计运作。**
+
+## 调试与验证
+
+将演化结果（第 1 轮 + 第 2 轮）合并回上游仓库后，我们进行了验证：
+
+| 检查项 | 结果 | 备注 |
+|--------|------|------|
+| 工具导入 | 通过 | 3 个工具均可正常导入和实例化 |
+| 单元测试 | 29/29 通过 | 两个测试文件全部通过 |
+| 入口接线 | 通过 | `main.py` 和 `agent_bridge.py` 均加载新工具 |
+| ArxivSearchTool 功能 | **可用** | 调用 arXiv API，返回论文结果 |
+| ActivateSkillTool 功能 | **可用** | 在技能注册表加载后可激活技能 |
+| SessionCostExportTool 功能 | **不可用** | 无数据来源——需要 CostTrackerMiddleware |
+| `/cost` TUI 命令 | **不可用** | 永远显示空（同一根本原因）|
+
+### 已知未修复问题
+
+`SessionCostExportTool` 需要一个 `CostTrackerMiddleware` 来拦截 LLM 响应并将 token 用量记录到 `session.metadata` 中。现有的 `ExecutionBudgetManager`（`backend/llm/middleware.py`）管理的是迭代次数限制，不追踪 token 数量。缺少该中间件时，第 2 轮的产出在结构上完整但实际上无法工作。
+
+### 做得好的地方
+
+- 演化的质量门控（导入检查、受保护文件守护、重复扫描）成功阻止了第 3 轮的问题变更
+- ArxivSearchTool 的 `BaseTool` 继承 bug 是一个真正的发现和修复
+- 所有生成的测试都有意义且全部通过
+- 没有引入代码破坏性问题
+
+### 做得不好的地方
+
+- 第 1 轮花了 20 分钟来添加本质上只有 2 行 `add_tool()` 接线的 `ActivateSkillTool`
+- 第 2 轮构建了导出工具却缺少数据收集层，产出了一个不可用的功能
+- 演化系统缺乏跨会话记忆——无法知道之前的会话已经尝试过类似工作
+
+## 分支结构
+
+```
+original          ← 会话启动时上游 main 的快照
+  └── evolution/r1-20260308_000525   ← PASS: 工具集成
+        └── evolution/r2-20260308_002612   ← PASS: 成本导出工具（已提升为 main）
+              └── evolution/r3-20260308_004252   ← FAIL: 仪表盘组件（被拒）
+main              ← 指向 r2（最后一个 PASS）
 ```
 
-### 2. 配置模型与 API 密钥
+## 报告
 
-需在以下文件中至少选择一个服务商进行配置：
-- `backend/llm_config.json`
-
-推荐通过环境变量配置 API 密钥，示例：
-
-```bash
-export OPENAI_API_KEY="你的密钥"
-export DASHSCOPE_API_KEY="你的密钥"
-```
-
-也可传入自定义密钥文件路径：
-
-```bash
-python main.py --keys /path/to/keys.json
-```
-
-### 3. 运行普通模式
-
-```bash
-python main.py "你的任务指令"
-```
-
-可选启动 TUI 交互界面：
-
-```bash
-python tui.py
-```
-
-## 自进化模式
-
-### 启动循环
-
-```bash
-bash evolve.sh
-```
-
-使用示例：
-
-```bash
-# 运行 5 轮进化
-bash evolve.sh 5
-
-# 指定模型运行 10 轮进化
-bash evolve.sh 10 qwen/qwen-plus
-```
-
-### 安全停止循环
-
-```bash
-touch .evolution_stop
-```
-
-脚本会在每轮结束后检查该标识文件，自动清理标识并退出。
-
-## 输出文件与状态文件
-
-- `evolution_reports/`：各轮次报告目录。
-- `evolution_state.json`：当前汇总状态文件。
-- `evolution_history.jsonl`：仅追加式轮次历史日志（进化运行时自动创建）。
-- `logs/`：运行时会话归档目录。
-
-## 注意事项
-
-- 请在干净的 Git 工作分支中运行进化模式。
-- 每轮进化成功后，通常会创建 `evolution/r<轮次>-<时间戳>` 格式的分支。
-- 为保障安全，`evolve.sh` 脚本在每轮结束后会尝试自动切回初始分支。
+详细的每轮报告在 `evolution_reports/` 目录中：
+- `round_1_20260308_002410.md`
+- `round_2_2026-03-08T00-41-03Z.md`
+- `round_3_20260308_004252.md`
